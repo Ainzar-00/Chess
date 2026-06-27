@@ -20,8 +20,10 @@ class piece{
 
         let range=this.getMoveRange()
         let mapPiece=null;
-        let newrange=getRangeType(this.type)
+        let newrange=range
+        console.log(this,pieces)
         let myPieces=pieces.filter((p)=>{return p?.color==this.color && p!=null} )
+        
         let oponnentPieces=pieces.filter((p)=>{return p?.color!=this.color && p!=null} )
         let myKing=myPieces.filter((p)=>{return p?.type=="king"})[0]
         let pinnedObject=null
@@ -29,7 +31,7 @@ class piece{
 
 
         if(threats?.length==1){
-            console.log("here",threats,threats[0].getLegalMoves(map,false,pieces,[]))
+            console.log("here",this.type,threats,threats[0].getLegalMoves(map,false,pieces,[]))
             attackedRangeObject=getAttackedRange(threats[0],myKing.position)
             attackedRangeObject.attackedRange=attackedRangeObject.attackedRange.filter((p)=>{return p[0]!=myKing.position[0] || p[1]!=myKing.position[1]})
         }
@@ -129,6 +131,18 @@ class piece{
                     range[i].forEach((el,index)=>{
                         mapPiece=map[el[0]][el[1]]
                         
+                        if(threats?.length==1 && (squareExistInRange(el,attackedRangeObject.attackedRange) || squareExistInRange(threats[0].position,[el]))){
+                            // console.log("first",(squareExistInRange(el,attackedRangeObject.attackedRange) || squareExistInRange(threats[0].position,[el])))
+                             range=getRangeType("queen")
+                             range[i].push(el)
+                             return 
+                        }
+
+                        else if(threats?.length==1){
+                            range[i]=range[i].slice(0,index)
+                            return
+                        }
+    
                         if(mapPiece!=null && mapPiece.color==this.color){
                             newrange[i]=range[i].slice(0,index)
                             return
@@ -168,15 +182,22 @@ class piece{
             
             case "bishop":
                  for(let i in range){ 
-                    
+                     
                     range[i].forEach((el,index)=>{
                         // console.log(el)
                         mapPiece=map[el[0]][el[1]]
                         if(threats?.length==1 && (squareExistInRange(el,attackedRangeObject.attackedRange) || squareExistInRange(threats[0].position,[el]))){
-                             newrange[i].push(el)
-                             console.log(newrange)
+                            // console.log("first",(squareExistInRange(el,attackedRangeObject.attackedRange) || squareExistInRange(threats[0].position,[el])))
+                             range=getRangeType("bishop")
+                             range[i].push(el)
                              return 
                         }
+
+                        else if(threats?.length==1){
+                            range[i]=range[i].slice(0,index)
+                            return
+                        }
+    
                         if(threats?.length==0){
                         if(mapPiece!=null && mapPiece.color==this.color ){
                             newrange[i]=range[i].slice(0,index)
@@ -192,7 +213,7 @@ class piece{
                 }
 
                 
-            return newrange
+            return range
 
 
             case "queen":
@@ -202,9 +223,14 @@ class piece{
                     range[key][subkey].forEach((el,index)=>{
                         mapPiece=map[el[0]][el[1]]
                         if(threats?.length==1 && (squareExistInRange(el,attackedRangeObject.attackedRange) || squareExistInRange(threats[0].position,[el]))){
-                             newrange[key][subkey].push(el)
+                             range=getRangeType("queen")
+                             range[key][subkey].push(el)
                              console.log(range)
                              return 
+                        }
+                        else if(threats?.length==1){
+                            range[key][subkey]=range[key][subkey].slice(0,index)
+                            return
                         }
 
                         if(threats?.length==0){
@@ -221,9 +247,9 @@ class piece{
                    
                 }
                 }
-                
 
-                return newrange
+
+                return range
             
             case "king":
                 for(let keys in range){
@@ -231,16 +257,17 @@ class piece{
                     range[keys][i].forEach((el,index)=>{
                         mapPiece=map[el[0]][el[1]]
                         // console.log(el,threats,positionExistInOppenentRange(el,threats,false,map,null))
-                        if(threats.length>=1 && positionExistInOppenentRange(el,threats,false,map,null)){
+                        if(threats.length>=1 && positionExistInOppenentRange(el,threats,true,map,pieces)){
                             console.log("true me")
                             newrange[keys][i]=range[keys][i].slice(0,index)
                             return
                         }
-
-                        if(positionExistInOppenentRange(el,oponnentPieces,true,map,pieces)){
+                        else if(positionExistInOppenentRange(el,oponnentPieces,true,map,pieces)){
+                            console.log("legal")
                              newrange[keys][i]=range[keys][i].slice(0,index)
                              return
                         }
+
                         if(mapPiece!=null && mapPiece.color==this.color){
                             newrange[keys][i]=range[keys][i].slice(0,index)
                             return
@@ -255,7 +282,6 @@ class piece{
                             return
                         }
                     })
-                      
                 }
                 }
                 
@@ -593,7 +619,7 @@ function positionExistInOppenentRange(square,pieceArray,legalMoves,map,pieces){
             range=piece.flatMovesArrays(piece.getMoveRange()) 
         } 
         else if(piece.type!="pawn" && legalMoves){
-            range=piece.flatMovesArrays(piece.getLegalMoves(map,null,pieces,null)) 
+            range=piece.flatMovesArrays(piece.getLegalMoves(map,null,pieces,[])) 
         }
         else range=piece.attackrange
         // console.log(range)
