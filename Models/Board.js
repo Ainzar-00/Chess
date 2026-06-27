@@ -31,8 +31,8 @@ class Board{
     CreateCustomBoard(customMap,kingsPositions){
         this.map=customMap
         this.kingsSquares=kingsPositions
-        this.analyseCheckState()
-        console.log(this.kingIsChecked)
+        this.isCheckMate()
+        console.log(this.kingIsChecked,this.checkMate)
 
     }
     
@@ -109,9 +109,9 @@ class Board{
       this.piece=null
       this.selected=false
 
-      //checks detection after color switch
-      this.analyseCheckState()
-      console.log(this.kingIsChecked)
+      //checkmate detection
+      this.isCheckMate()
+      console.log(this.kingIsChecked,this.checkMate)
 
       return true 
     }
@@ -149,9 +149,21 @@ class Board{
       }
         }
     }
-                             
-    isCheckMate(){
 
+    isCheckMate(){
+        let myPieces=this.getPieces().filter((p)=>{return p?.color==this.color && p!=null} )
+        let legalMoves
+        for(let piece of myPieces){
+            legalMoves=piece.flatMovesArrays(piece.getLegalMoves(this.map,null,this.getPieces(),this.analyseCheckState()))
+            if(legalMoves.length>0){
+                console.log(piece,legalMoves)
+                this.checkMate=false
+                return false
+            }
+        }
+        this.checkMate=true
+        return true
+        
     }
 
     analyseCheckState(){

@@ -21,7 +21,7 @@ class piece{
         let range=this.getMoveRange()
         let mapPiece=null;
         let newrange=range
-        console.log(this,pieces)
+        // console.log(this,pieces)
         let myPieces=pieces.filter((p)=>{return p?.color==this.color && p!=null} )
         
         let oponnentPieces=pieces.filter((p)=>{return p?.color!=this.color && p!=null} )
@@ -46,7 +46,7 @@ class piece{
                     return []
                 }
                 if(pinnedObject!=null && this.type =="pawn"){
-                     console.log("pawn detected")
+                    //  console.log("pawn detected")
                      pinnedObject["pinPiece"]=oPiece
                      break
                 }
@@ -74,20 +74,29 @@ class piece{
                 newrange=range["normal"]
                 range["normal"].forEach((el,index)=> {
                     mapPiece=map[el[0]][el[1]]
-                        console.log("pawn",pinnedObject)
+                        // console.log("pawn",range)
 
                     if(pinnedObject!=null && pinnedObject.keys[0]!="cross"){
                        newrange=[]
                        return
                     }
                     else if(threats?.length==1 && squareExistInRange(el,attackedRangeObject.attackedRange)){
-                            console.log(true)
+                            // console.log("dec1",el,attackedRangeObject.attackedRange)
+                            newrange=[el]
+                            return
+                    }
+                    else if(threats?.length==1){
+                        // console.log("dec2",el,attackedRangeObject.attackedRange,range,newrange)
+                        newrange=[]
+                        return
                     }
                     if(mapPiece!=null){
-                            //has changed
-                           newrange=range["normal"].slice(0,index)
-                           return
-                    } 
+                        console.log(range["normal"],index)
+                        newrange=range["normal"].reverse().slice(0,index-1)
+                        return
+                        // } 
+                    }
+                    
                     
                     
                 });
@@ -103,8 +112,8 @@ class piece{
                         else if(pinnedObject!=null){
                             return
                         }
-                        else if(threats?.length==1 && squareExistInRange(threats[0],myKing.position)){
-                            
+                        else if(threats?.length==1 ){
+                            return 
                         }
                         if(newposition!=null && mapPiece.color!=this.color && newposition[0]==el[0] && newposition[1]==el[1]){
                             newrange.push(el)
@@ -133,7 +142,7 @@ class piece{
                         
                         if(threats?.length==1 && (squareExistInRange(el,attackedRangeObject.attackedRange) || squareExistInRange(threats[0].position,[el]))){
                             // console.log("first",(squareExistInRange(el,attackedRangeObject.attackedRange) || squareExistInRange(threats[0].position,[el])))
-                             range=getRangeType("queen")
+                             range=getRangeType("rook")
                              range[i].push(el)
                              return 
                         }
@@ -142,7 +151,7 @@ class piece{
                             range[i]=range[i].slice(0,index)
                             return
                         }
-    
+                        if(threats?.length==0){
                         if(mapPiece!=null && mapPiece.color==this.color){
                             newrange[i]=range[i].slice(0,index)
                             return
@@ -150,7 +159,7 @@ class piece{
                         else if(mapPiece!=null && mapPiece.color!=this.color){
                             newrange[i]=range[i].slice(0,index+1)
                             return
-                        }
+                        }}
                     })
                 }
 
@@ -161,8 +170,11 @@ class piece{
             for(let el of range){
             
                 mapPiece=map[el[0]][el[1]]
-                if(threats?.length==1 && (squareExistInRange(el,attackedRangeObject.attackedRange) || squareExistInRange(threats[0].position,[el]))){
-                    newrange.push(el)
+                // console.log("threats",threats[0],attackedRangeObject)
+                if(threats?.length==1  ){
+                    // console.log("knight checked")
+                    if((squareExistInRange(el,attackedRangeObject.attackedRange) || squareExistInRange(threats[0].position,[el]))) newrange.push(el)
+                    
                 }
                 else if(threats?.length==0){
                      if( mapPiece!=null && mapPiece.color!=this.color){
@@ -176,7 +188,7 @@ class piece{
                 
             }
 
-            // console.log(newrange,map,"range",range)
+            // console.log(newrange,"range",range)
 
             return newrange
             
@@ -565,6 +577,13 @@ function getAttackedRange(threatPiece,kingPosition){
                 attackedRange=threatMovegRange[key]
                 if(threatPiece.type=="bishop") keys.push("diagonal",key)
                 else keys.push("cross",key)
+            } 
+        }
+        else if(threatPiece.type=="knight"){
+            if(squareExistInRange(kingPosition,threatMovegRange)){
+                attackedRange=threatMovegRange[key]
+                console.log("attack",attackedRange)
+                return {"keys":[],"attackedRange":[attackedRange]}
             } 
         }
         else{

@@ -12,10 +12,10 @@ let btn=document.getElementById("reversebtn")
 let rotation=0
 
 let game=new chessGame()
-// game.startStandardGame()
+game.startStandardGame()
 
-game.startCustomGame()
-updateBoard(game.getMap())
+// game.startCustomGame()
+// updateBoard(game.getMap())
 
 // console.log(game.getMap())
 
